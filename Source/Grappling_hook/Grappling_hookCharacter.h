@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "CustomMovementComponent.h"
 #include "Grappling_hookCharacter.generated.h"
 
 UCLASS(config=Game)
@@ -18,15 +19,21 @@ class AGrappling_hookCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hook, meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* Hook_start;
 public:
-	AGrappling_hookCharacter();
+	AGrappling_hookCharacter(const FObjectInitializer& ObjectInitializer);
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
 	float TurnRateGamepad;
 
+	
+
 protected:
 
+	
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
 
@@ -52,14 +59,27 @@ protected:
 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
 
 protected:
+	FCollisionQueryParams HookQueryParams;
+	FHitResult HookHit;
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
+
+	virtual void BeginPlay();
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly)
+	class UCustomMovementComponent* CustomMovementComponent;
 
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	UFUNCTION(BlueprintPure)
+		FORCEINLINE UCustomMovementComponent* GetCustomCharacterMovement() const { return CustomMovementComponent; }
+
+	UFUNCTION(BlueprintCallable)
+		void Try_hook();
+
 };
 

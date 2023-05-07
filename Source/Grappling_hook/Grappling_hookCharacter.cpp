@@ -8,11 +8,15 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 
+class CustomMovementComponent;
+
 //////////////////////////////////////////////////////////////////////////
 // AGrappling_hookCharacter
 
-AGrappling_hookCharacter::AGrappling_hookCharacter()
+AGrappling_hookCharacter::AGrappling_hookCharacter(const FObjectInitializer& ObjectInitializer)
+	:Super(ObjectInitializer.SetDefaultSubobjectClass<UCustomMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
+	CustomMovementComponent = Cast<UCustomMovementComponent>(GetCharacterMovement());
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -75,6 +79,22 @@ void AGrappling_hookCharacter::SetupPlayerInputComponent(class UInputComponent* 
 	// handle touch devices
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &AGrappling_hookCharacter::TouchStarted);
 	PlayerInputComponent->BindTouch(IE_Released, this, &AGrappling_hookCharacter::TouchStopped);
+}
+
+void AGrappling_hookCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void AGrappling_hookCharacter::Try_hook()
+{
+	FVector Start = Hook_start->GetComponentLocation();
+	FVector End = FollowCamera->GetForwardVector() * 10000;
+
+	GetWorld()->LineTraceSingleByChannel(HookHit, Start, End, ECC_WorldStatic, HookQueryParams);
+
+
+
 }
 
 void AGrappling_hookCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
